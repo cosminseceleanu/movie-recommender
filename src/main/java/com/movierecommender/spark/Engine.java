@@ -30,8 +30,6 @@ public class Engine {
             double rating = Double.parseDouble(lineParts[2]);
             return new Rating(userId, movieId, rating);
         });
-        initialBuild(ratings);
-
 
         //selecting als parameters
         double weights[] = {6, 2, 2};
@@ -44,30 +42,5 @@ public class Engine {
         System.out.println("validation -> " + validationRdd.count());
         System.out.println("test -> " + testRdd.count());
         ModelTrainer.train(trainingRdd, testRdd, validationRdd);
-    }
-
-    private static void initialBuild(JavaRDD<Rating> ratings) {
-        // Build the recommendation model using ALS
-        int rank = 10;
-        int numIterations = 10;
-        MatrixFactorizationModel model = ALS.train(JavaRDD.toRDD(ratings), rank, numIterations, 0.01);
-
-        // Evaluate the model on rating data
-        JavaRDD<Tuple2<Object, Object>> userProducts = ratings.map(r -> new Tuple2<>(r.user(), r.product()));
-
-        JavaPairRDD<Tuple2<Integer, Integer>, Double> predictions = JavaPairRDD.fromJavaRDD(
-                model.predict(JavaRDD.toRDD(userProducts))
-                        .toJavaRDD()
-                        .map(r -> new Tuple2<>(new Tuple2<>(r.user(), r.product()), r.rating()))
-        );
-        JavaRDD<Tuple2<Double, Double>> ratesAndPreds = JavaPairRDD.fromJavaRDD(
-                ratings.map(r -> new Tuple2<>(new Tuple2<>(r.user(), r.product()), r.rating())))
-                .join(predictions).values();
-
-        double MSE = ratesAndPreds.mapToDouble(pair -> {
-            double err = pair._1() - pair._2();
-            return err * err;
-        }).mean();
-        System.out.println("Mean Squared Error = " + MSE);
     }
 }
