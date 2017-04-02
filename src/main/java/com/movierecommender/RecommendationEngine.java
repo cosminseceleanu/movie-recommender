@@ -1,6 +1,8 @@
 package com.movierecommender;
 
 import com.movierecommender.spark.Engine;
+import com.movierecommender.spark.train.ModelFinder;
+import com.movierecommender.spark.train.TrainConfig;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -17,7 +19,10 @@ public class RecommendationEngine {
                 .setJars(new String[]{"build/libs/movie-recommender-1.0.jar"})
                 .setAppName("Movie Recommendation");
         JavaSparkContext sparkContext = new JavaSparkContext(conf);
-
-        Engine.start(sparkContext);
+        ModelFinder modelFinder = new ModelFinder();
+        Engine engine = new Engine(sparkContext, modelFinder);
+        TrainConfig trainConfig = new TrainConfig(10, 4);
+        engine.start(trainConfig);
+        engine.test();
     }
 }

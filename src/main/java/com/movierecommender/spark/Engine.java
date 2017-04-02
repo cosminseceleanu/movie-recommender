@@ -1,46 +1,71 @@
 package com.movierecommender.spark;
 
 import com.movierecommender.model.Movie;
-import org.apache.spark.api.java.JavaPairRDD;
+import com.movierecommender.spark.train.ModelFactory;
+import com.movierecommender.spark.train.ModelFinder;
+import com.movierecommender.spark.train.TrainConfig;
+import com.movierecommender.spark.train.TrainedModel;
+import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.mllib.recommendation.ALS;
-import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.apache.spark.mllib.recommendation.Rating;
-import scala.Tuple2;
 
 public class Engine {
-    public static final String moviesPath = "/opt/spark/data/ml-100k/movies.csv";
-    public static final String ratingsPath = "/opt/spark/data/ml-100k/ratings.csv";
+    private static final String moviesPath = "/opt/spark/data/ml-100k/movies.csv";
+    private static final String ratingsPath = "/opt/spark/data/ml-100k/ratings.csv";
+    private static Logger logger = Logger.getLogger(Engine.class);
 
-    public static void start(JavaSparkContext sparkContext) {
+    private JavaSparkContext sparkContext;
+    private ModelFinder modelFinder;
+
+    private JavaRDD<Movie> movies;
+    private JavaRDD<Rating> ratings;
+    private TrainedModel model;
+
+    public Engine(JavaSparkContext sparkContext, ModelFinder modelFinder) {
+        this.sparkContext = sparkContext;
+        this.modelFinder = modelFinder;
+    }
+
+    public void start() {
+        load();
+        model = modelFinder.findBestModel(ratings);
+    }
+
+    public void start(TrainConfig trainConfig) {
+        load();
+        double[] weights = {8, 2};
+        JavaRDD<Rating>[] randomRatings = ratings.randomSplit(weights, 0L);
+        model = ModelFactory.create(randomRatings[0], randomRatings[1],
+                trainConfig.getRankNr(), trainConfig.getIterationsNr());
+    }
+
+    private void load() {
         //load and parse the data
+        logger.info("load movies data");
         JavaRDD<String> moviesData = sparkContext.textFile(moviesPath);
-        JavaRDD<String> ratingsData = sparkContext.textFile(ratingsPath);
+        logger.info("load ratings data");
+        JavaRDD<String>ratingsData = sparkContext.textFile(ratingsPath);
 
-        JavaRDD<Movie> movies = moviesData.map(line -> {
+        movies = moviesData.map(line -> {
             String[] lineParts = line.split(",");
             int movieId = Integer.parseInt(lineParts[0]);
             return new Movie(movieId, lineParts[1], lineParts[2]);
         });
-        JavaRDD<Rating> ratings = ratingsData.map(line -> {
+        ratings = ratingsData.map(line -> {
             String[] lineParts = line.split(",");
             int userId = Integer.parseInt(lineParts[0]);
             int movieId = Integer.parseInt(lineParts[1]);
             double rating = Double.parseDouble(lineParts[2]);
             return new Rating(userId, movieId, rating);
         });
+    }
 
-        //selecting als parameters
-        double weights[] = {6, 2, 2};
-        JavaRDD<Rating>[] randomRatings = ratings.randomSplit(weights, 0L);
-        JavaRDD<Rating> trainingRdd = randomRatings[0];
-        JavaRDD<Rating> validationRdd = randomRatings[1];
-        JavaRDD<Rating> testRdd = randomRatings[2];
-        System.out.println("raitings -> " + ratings.count());
-        System.out.println("training -> " + trainingRdd.count());
-        System.out.println("validation -> " + validationRdd.count());
-        System.out.println("test -> " + testRdd.count());
-        ModelTrainer.train(trainingRdd, testRdd, validationRdd);
+    public void test() {
+        Rating[] recommendProducts = model.getModel().recommendProducts(1, 5);
+        for (Rating rating : recommendProducts) {
+            System.out.println(rating);
+            System.out.println(movies.filter(movie -> rating.product() == movie.getMovieId()).first());
+        }
     }
 }
