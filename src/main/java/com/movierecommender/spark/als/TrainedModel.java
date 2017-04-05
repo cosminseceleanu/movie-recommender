@@ -1,4 +1,4 @@
-package com.movierecommender.spark.train;
+package com.movierecommender.spark.als;
 
 import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 

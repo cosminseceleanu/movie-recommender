@@ -1,4 +1,4 @@
-package com.movierecommender.spark.train;
+package com.movierecommender.spark.als;
 
 public class TrainConfig {
     private final int iterationsNr;

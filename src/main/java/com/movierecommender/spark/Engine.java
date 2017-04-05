@@ -1,10 +1,10 @@
 package com.movierecommender.spark;
 
 import com.movierecommender.model.Movie;
-import com.movierecommender.spark.train.ModelFactory;
-import com.movierecommender.spark.train.ModelFinder;
-import com.movierecommender.spark.train.TrainConfig;
-import com.movierecommender.spark.train.TrainedModel;
+import com.movierecommender.spark.als.ModelFactory;
+import com.movierecommender.spark.als.ModelFinder;
+import com.movierecommender.spark.als.TrainConfig;
+import com.movierecommender.spark.als.TrainedModel;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;

@@ -1,8 +1,8 @@
 package com.movierecommender;
 
 import com.movierecommender.spark.Engine;
-import com.movierecommender.spark.train.ModelFinder;
-import com.movierecommender.spark.train.TrainConfig;
+import com.movierecommender.spark.als.ModelFinder;
+import com.movierecommender.spark.als.TrainConfig;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;

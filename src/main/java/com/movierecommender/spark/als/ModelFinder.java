@@ -1,4 +1,4 @@
-package com.movierecommender.spark.train;
+package com.movierecommender.spark.als;
 
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
