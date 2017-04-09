@@ -15,11 +15,12 @@ public class CommandExecutor {
     }
 
     public void execute(String commandName) {
-        logger.info("Executing command " + commandName);
         commands.forEach(command -> {
-            if (command.getName().equals(commandName)) {
-                command.execute();
+            if (!command.getName().equals(commandName)) {
+                return;
             }
+            logger.info("Executing command " + commandName);
+            command.execute();
         });
     }
 }

@@ -8,22 +8,20 @@ import com.movierecommender.main.di.MainModule;
 import com.movierecommender.main.di.SparkModule;
 
 public class Application {
-    private Args args;
+    private static Args args;
 
-    public static void main(String[] args) {
-        Application application = new Application();
-        application.parseArgs(args);
-
+    public static void main(String[] arguments) {
+        parseArgs(arguments);
         Injector injector = Guice.createInjector(new MainModule(), new SparkModule());
 
         CommandExecutor executor = injector.getInstance(CommandExecutor.class);
-        executor.execute("aaa");
+        executor.execute(args.getCommandName());
     }
 
-    private void parseArgs(String[] argv) {
+    private static void parseArgs(String[] arguments) {
         args = new Args();
         JCommander commander = new JCommander();
         commander.addObject(args);
-        commander.parse(argv);
+        commander.parse(arguments);
     }
 }
