@@ -1,18 +1,29 @@
 package com.movierecommender.main;
 
+import com.beust.jcommander.JCommander;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.movierecommender.main.commands.CommandExecutor;
+import com.movierecommender.main.di.MainModule;
 import com.movierecommender.main.di.SparkModule;
-import com.movierecommender.spark.Engine;
-import com.movierecommender.spark.als.TrainConfig;
 
 public class Application {
-    public static void main(String[] args) {
-        Injector injector = Guice.createInjector(new SparkModule());
+    private Args args;
 
-        Engine engine = injector.getInstance(Engine.class);
-        TrainConfig trainConfig = new TrainConfig(10, 4);
-        engine.start(trainConfig);
-        engine.test();
+    public static void main(String[] args) {
+        Application application = new Application();
+        application.parseArgs(args);
+
+        Injector injector = Guice.createInjector(new MainModule(), new SparkModule());
+
+        CommandExecutor executor = injector.getInstance(CommandExecutor.class);
+        executor.execute("aaa");
+    }
+
+    private void parseArgs(String[] argv) {
+        args = new Args();
+        JCommander commander = new JCommander();
+        commander.addObject(args);
+        commander.parse(argv);
     }
 }
