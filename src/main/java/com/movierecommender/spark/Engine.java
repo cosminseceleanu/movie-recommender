@@ -1,10 +1,11 @@
 package com.movierecommender.spark;
 
-import com.movierecommender.model.Movie;
+import com.google.inject.Inject;
 import com.movierecommender.spark.als.ModelFactory;
 import com.movierecommender.spark.als.ModelFinder;
 import com.movierecommender.spark.als.TrainConfig;
 import com.movierecommender.spark.als.TrainedModel;
+import com.movierecommender.spark.model.Movie;
 import org.apache.log4j.Logger;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -22,6 +23,7 @@ public class Engine {
     private JavaRDD<Rating> ratings;
     private TrainedModel model;
 
+    @Inject
     public Engine(JavaSparkContext sparkContext, ModelFinder modelFinder) {
         this.sparkContext = sparkContext;
         this.modelFinder = modelFinder;
