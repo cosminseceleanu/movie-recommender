@@ -15,7 +15,7 @@ public class Application {
         Injector injector = Guice.createInjector(new MainModule(), new SparkModule());
 
         CommandExecutor executor = injector.getInstance(CommandExecutor.class);
-        executor.execute(args.getCommandName());
+        executor.execute("streaming-test");
     }
 
     private static void parseArgs(String[] arguments) {
