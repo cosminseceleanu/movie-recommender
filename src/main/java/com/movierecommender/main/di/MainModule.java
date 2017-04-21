@@ -2,17 +2,15 @@ package com.movierecommender.main.di;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import com.movierecommender.main.commands.Command;
-import com.movierecommender.main.commands.StreamingCommand;
-import com.movierecommender.main.commands.TestCassandraCommand;
-import com.movierecommender.main.commands.TestStreamingCommand;
+import com.movierecommender.main.jobs.Job;
+import com.movierecommender.main.jobs.StreamingJob;
+import com.movierecommender.main.jobs.TestStreamingJob;
 
 public class MainModule extends AbstractModule {
     @Override
     protected void configure() {
-        Multibinder<Command> uriBinder = Multibinder.newSetBinder(binder(),  Command.class);
-        uriBinder.addBinding().to(StreamingCommand.class);
-        uriBinder.addBinding().to(TestStreamingCommand.class);
-        uriBinder.addBinding().to(TestCassandraCommand.class);
+        Multibinder<Job> uriBinder = Multibinder.newSetBinder(binder(),  Job.class);
+        uriBinder.addBinding().to(StreamingJob.class);
+        uriBinder.addBinding().to(TestStreamingJob.class);
     }
 }

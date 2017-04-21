@@ -1,21 +1,21 @@
-package com.movierecommender.main.commands;
+package com.movierecommender.main.jobs;
 
 import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 
 import java.util.Set;
 
-public class CommandExecutor {
-    private Set<Command> commands;
-    private Logger logger = Logger.getLogger(CommandExecutor.class);
+public class JobExecutor {
+    private Set<Job> jobs;
+    private Logger logger = Logger.getLogger(JobExecutor.class);
 
     @Inject
-    public CommandExecutor(Set<Command> commands) {
-        this.commands = commands;
+    public JobExecutor(Set<Job> jobs) {
+        this.jobs = jobs;
     }
 
     public void execute(String commandName) {
-        commands.forEach(command -> {
+        jobs.forEach(command -> {
             if (!command.getName().equals(commandName)) {
                 return;
             }
