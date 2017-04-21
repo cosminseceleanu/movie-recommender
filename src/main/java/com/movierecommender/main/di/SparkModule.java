@@ -2,7 +2,9 @@ package com.movierecommender.main.di;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.movierecommender.main.kafka.JsonDeserializer;
 import com.movierecommender.spark.als.ModelFinder;
+import com.movierecommender.spark.model.RawRating;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -41,9 +43,12 @@ public class SparkModule extends AbstractModule {
     @Provides
     SparkConf provideSparkConf() {
         return new SparkConf()
-                .setMaster("spark://127.0.1.1:7077")
+//                .setMaster("spark://127.0.1.1:7077")
+                .setMaster("local[*]")
                 .setJars(new String[]{"target/movie-recommender-1.0-SNAPSHOT-jar-with-dependencies.jar"})
-                .setAppName("Movie Recommendation");
+                .setAppName("Movie Recommendation")
+                .set("spark.executor.memory", "4g")
+                .set("spark.cassandra.connection.host", "172.18.0.4");
     }
 
     @Provides
@@ -67,12 +72,13 @@ public class SparkModule extends AbstractModule {
     }
 
     @Provides
-    JavaInputDStream<ConsumerRecord<String, String>> providesKafkaInputStream(JavaStreamingContext streamingContext) {
+    JavaInputDStream<ConsumerRecord<String, RawRating>> providesKafkaInputStream(JavaStreamingContext streamingContext) {
         Map<String, Object> kafkaParams = new HashedMap();
         kafkaParams.put("bootstrap.servers", "localhost:9092");
         kafkaParams.put("key.deserializer", StringDeserializer.class);
-        kafkaParams.put("value.deserializer", StringDeserializer.class);
-        kafkaParams.put("group.id", "use_a_separate_group_id_for_each_stream");
+        kafkaParams.put("value.deserializer", JsonDeserializer.class);
+        kafkaParams.put("serializedClass", RawRating.class);
+        kafkaParams.put("group.id", "rating_stream");
         kafkaParams.put("auto.offset.reset", "latest");
         kafkaParams.put("enable.auto.commit", false);
         Collection<String> topics = Arrays.asList("topicA", "topicB");
@@ -80,7 +86,7 @@ public class SparkModule extends AbstractModule {
         return KafkaUtils.createDirectStream(
                 streamingContext,
                 LocationStrategies.PreferConsistent(),
-                ConsumerStrategies.<String, String>Subscribe(topics, kafkaParams)
+                ConsumerStrategies.<String, RawRating>Subscribe(topics, kafkaParams)
         );
     }
 }
