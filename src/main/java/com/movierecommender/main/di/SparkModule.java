@@ -2,9 +2,10 @@ package com.movierecommender.main.di;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.movierecommender.main.io.CassandraIo;
 import com.movierecommender.main.kafka.JsonDeserializer;
 import com.movierecommender.spark.als.ModelFinder;
-import com.movierecommender.spark.model.RawRating;
+import com.movierecommender.main.model.RawRating;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -27,6 +28,7 @@ public class SparkModule extends AbstractModule {
 
     private JavaSparkContext sparkContext = null;
     private JavaStreamingContext streamingContext = null;
+    private CassandraIo<RawRating> ratingCassandraIo = null;
 
     @Override
     protected void configure() {
@@ -88,5 +90,17 @@ public class SparkModule extends AbstractModule {
                 LocationStrategies.PreferConsistent(),
                 ConsumerStrategies.<String, RawRating>Subscribe(topics, kafkaParams)
         );
+    }
+
+    @Provides
+    CassandraIo<RawRating> providesCassandraRatingIO(JavaSparkContext sparkContext) {
+        if (ratingCassandraIo != null) {
+            return ratingCassandraIo;
+        }
+        ratingCassandraIo = new CassandraIo<>(RawRating.class, "dev", "ratings");
+        ratingCassandraIo.setSparkContext(sparkContext);
+
+
+        return ratingCassandraIo;
     }
 }

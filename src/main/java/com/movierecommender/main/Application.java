@@ -16,7 +16,7 @@ public class Application {
         Injector injector = Guice.createInjector(new MainModule(), new SparkModule());
 
         JobExecutor executor = injector.getInstance(JobExecutor.class);
-        executor.execute(Job.DEFAULT_COMMAND);
+        executor.execute(args.getCommandName());
     }
 
     private static void parseArgs(String[] arguments) {

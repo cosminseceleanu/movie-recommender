@@ -1,4 +1,4 @@
-package com.movierecommender.spark.model;
+package com.movierecommender.main.model;
 
 import org.apache.spark.mllib.recommendation.Rating;
 
@@ -7,9 +7,9 @@ import java.io.Serializable;
 public class RawRating implements Serializable {
     private int user;
     private int product;
-    private float rating;
+    private double rating;
 
-    public RawRating(int user, int product, float rating) {
+    public RawRating(int user, int product, double rating) {
         this.user = user;
         this.product = product;
         this.rating = rating;
@@ -23,11 +23,15 @@ public class RawRating implements Serializable {
         return product;
     }
 
-    public float getRating() {
+    public double getRating() {
         return rating;
     }
 
     public Rating toSparkRating() {
         return new Rating(user, product, rating);
+    }
+
+    public static RawRating fromSparkRating(Rating rating) {
+        return new RawRating(rating.user(), rating.product(), rating.rating());
     }
 }

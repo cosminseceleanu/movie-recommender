@@ -15,7 +15,7 @@ public class TrainedModel {
         return error;
     }
 
-    public MatrixFactorizationModel getModel() {
+    public MatrixFactorizationModel getMatrixModel() {
         return model;
     }
 }

@@ -1,4 +1,4 @@
-package com.movierecommender.spark.model;
+package com.movierecommender.main.model;
 
 import java.io.Serializable;
 
